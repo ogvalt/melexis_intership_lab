@@ -20,7 +20,6 @@ always @(posedge clk or negedge rst_n) begin
 end
 endmodule
 
-`timescale 1 ns / 1 ps
 module reg_8bit_we_mod_tb;
 parameter period = 4;
 reg 	   clk, rst_n, we_n;
