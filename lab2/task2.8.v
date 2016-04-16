@@ -1,16 +1,16 @@
 `timescale 1 ns/1 ps
 
-module task28;
+module mux_tb;
 
 	reg [ 3:0]  op1, op2, op3, op4, op5;
 	reg	[ 2:0]	ctrl;
-	reg [ 3:0]  out;
+	wire[ 3:0]  out;
 
-	mux task27(.i_data1(op1), 
-			.i_data2(op2), 
-			.i_data3(op3), 
-			.i_data4(op4), 
-			.i_data5(op5), 
+	mux mux(.i_data0(op1), 
+			.i_data1(op2), 
+			.i_data2(op3), 
+			.i_data3(op4), 
+			.i_data4(op5), 
 			.i_ctrl(ctrl), 
 			.o_data(out)
 			);		   		
@@ -28,7 +28,7 @@ module task28;
 			#1;
 			case (ctrl)
 				0: begin
-					if (op1==out) begin
+					if (op1!==out) begin
 						error = error + 1;
 						$display("Error at %d: op1=%d, op2=%d, op3=%d, op4=%d, op5=%d, out=%d, ctrl=%d true_out=%d",$time, 
 						op1, op2, op3, op4, op5, out, ctrl, op1);

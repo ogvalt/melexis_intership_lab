@@ -1,9 +1,9 @@
 `timescale 1 ns/1 ps
 
-module task212;
+module bitwise_nor_tb;
 
-	reg [ 3:0]  op1, op2;
-	reg [ 3:0]  out;
+	reg  [ 3:0]  op1, op2;
+	wire [ 3:0]  out;
 
 	bitwise_nor notor(.i_op1(op1),
 				 	  .i_op2(op2),

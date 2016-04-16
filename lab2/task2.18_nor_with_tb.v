@@ -18,11 +18,11 @@ module bitwise_nor(i_op1, i_op2, o_nor);
 endmodule
 
 module bitwise_nor_tb;
+	parameter WIDTH = 8;
+	reg  [WIDTH-1:0]  op1, op2;
+	wire [WIDTH-1:0]  out;
 
-	reg [ 3:0]  op1, op2;
-	reg [ 3:0]  out;
-
-	bitwise_nor #(.WIDTH(4)) notor(.i_op1(op1),
+	bitwise_nor #(.WIDTH(WIDTH)) notor(.i_op1(op1),
 				 	  .i_op2(op2),
 				 	  .o_nor(out)
 				 	 );		   		
@@ -30,8 +30,8 @@ module bitwise_nor_tb;
 	integer i, j, res, error = 0;
 
 	initial begin
-		for (i=0; i<16; i=i+1) begin: outer
-			for(j=0;j<16; j=j+1) begin: inner
+		for (i=0; i<2**WIDTH; i=i+1) begin: outer
+			for(j=0;j<2**WIDTH; j=j+1) begin: inner
 				op1 = i;
 				op2 = j;
 				res = {~(op1|op2)};

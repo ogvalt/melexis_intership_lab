@@ -50,7 +50,7 @@ module param_subtractor (i_op1, i_op2, i_borrow_in, o_subtract, o_borrow_out);
 	generate 
 		for(i=0; i<WIDTH; i=i+1) begin : sub_iteration
 			if(i==0) 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_borrow_in(i_borrow_in),
 								 .o_subtract(o_subtract[i]),
@@ -58,7 +58,7 @@ module param_subtractor (i_op1, i_op2, i_borrow_in, o_subtract, o_borrow_out);
 								);
 			
 			else 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_borrow_in(borrow[i-1]),
 								 .o_subtract(o_subtract[i]),
@@ -70,15 +70,15 @@ module param_subtractor (i_op1, i_op2, i_borrow_in, o_subtract, o_borrow_out);
 endmodule
 
 module param_subtractor_tb;
-
-	reg [ 3:0]  op1, op2;
+	parameter WIDTH = 8;
+	reg [WIDTH-1:0]  op1, op2;
 	reg 	    borrow_in;
-	reg [ 3:0]  subtract;
-	reg 		borrow_out;
+	wire [WIDTH-1:0]  subtract;
+	wire		borrow_out;
 
-	reg signed [ 4:0]  borrow_concat_sub;
+	reg signed [WIDTH:0]  borrow_concat_sub;
 
-	param_subtractor #(.WIDTH(4)) four_bit_subtractor(.i_op1(op1), 
+	param_subtractor #(.WIDTH(WIDTH)) four_bit_subtractor(.i_op1(op1), 
 					   		.i_op2(op2), 
 					   		.i_borrow_in(borrow_in),
 					   		.o_subtract(subtract),
@@ -89,9 +89,24 @@ module param_subtractor_tb;
 
 	initial begin
 		borrow_in = 0;
-		for (i=0; i<16; i=i+1) begin
-			for (j=0; j<16; j=j+1) begin
+		for (i=0; i<2**WIDTH; i=i+1) begin
+			for (j=0; j<2**WIDTH; j=j+1) begin
 				res = i - j;
+				op1 = i;
+				op2 = j;
+				#1;
+				borrow_concat_sub = $signed({borrow_out, subtract});
+				if (res!=borrow_concat_sub) begin
+					error = error + 1;
+					$display("Error at %d: i=%d, j=%d, i-j=%d, op1=%d, op2=%d, op1-op2=%d, borrow_out=%d, subtract=%d",$time, 
+						i, j, res, op1, op2, borrow_concat_sub, borrow_out, subtract);
+				end // if (res!= sum)
+			end // for (j=0; j<16; j=j+1)
+		end // for (i=0; i<16; i=i+1)
+		borrow_in = 1;
+		for (i=0; i<2**WIDTH; i=i+1) begin
+			for (j=0; j<2**WIDTH; j=j+1) begin
+				res = i - j - borrow_in;
 				op1 = i;
 				op2 = j;
 				#1;

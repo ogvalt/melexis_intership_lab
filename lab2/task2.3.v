@@ -8,7 +8,7 @@ module half_subtractor (i_op1, i_op2, o_subtract, o_borrow);
 	and (o_borrow, ~i_op1, i_op2);
 
 endmodule
-ї
+
 module full_subtractor(i_op1, i_op2, i_borrow_in, o_subtract, o_borrow);
 	
 	input  i_op1, i_op2, i_borrow_in;
@@ -48,7 +48,7 @@ module four_bit_subtractor (i_op1, i_op2, i_borrow_in, o_subtract, o_borrow_out)
 	generate 
 		for(i=0; i<4; i=i+1) begin : adder_iteration
 			if(i==0) 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_borrow_in(i_borrow_in),
 								 .o_subtract(o_subtract[i]),
@@ -56,7 +56,7 @@ module four_bit_subtractor (i_op1, i_op2, i_borrow_in, o_subtract, o_borrow_out)
 								);
 			
 			else 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_borrow_in(borrow[i-1]),
 								 .o_subtract(o_subtract[i]),

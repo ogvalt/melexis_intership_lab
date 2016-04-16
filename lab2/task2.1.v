@@ -32,7 +32,7 @@ module full_adder(i_op1, i_op2, i_carry_prev, o_sum, o_carry);
 
 endmodule
 
-module four_bit_adder (i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
+module four_bit_adder(i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
 
 	input  [ 3:0] i_op1, i_op2;
 	input 		  i_carry_in;
@@ -48,7 +48,7 @@ module four_bit_adder (i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
 	generate 
 		for(i=0; i<4; i=i+1) begin : adder_iteration
 			if(i==0) 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl(.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(i_carry_in),
 								 .o_sum(o_sum[i]),
@@ -56,7 +56,7 @@ module four_bit_adder (i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
 								);
 			
 			else 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl(.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(carry[i-1]),
 								 .o_sum(o_sum[i]),

@@ -49,14 +49,14 @@ module adder_without_carry_in(i_op1, i_op2, o_sum, o_carry_out);
 	generate 
 		for(i=0; i<WIDTH; i=i+1) begin : adder_iteration
 			if(i==0) 
-				half_adder cell (.i_op1(i_op1[i]),
+				half_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .o_sum(o_sum[i]),
 								 .o_carry(carry[i])
 								);
 			
 			else 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(carry[i-1]),
 								 .o_sum(o_sum[i]),
@@ -117,5 +117,4 @@ module multiple(i_op1, i_op2, o_mult);
 									.o_carry_out(carry_third_stage)
 									);
 	assign o_mult[7:3] = {carry_third_stage, sum_third_stage}; 
-	connect[(i+2)*WIDTH:(i+1)*WIDTH]
 endmodule

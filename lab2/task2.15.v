@@ -1,11 +1,11 @@
 `timescale 1 ns/1 ps
 
-module task215;
+module alu_tb;
 
 	reg [ 3:0]  op1, op2;
 	reg [ 2:0]  ctrl;
 	wire[ 7:0]  out_beh;
-	reg [ 7:0]  out_rtl;
+	wire[ 7:0]  out_rtl;
 
 	behavioral_alu alu_beh(.i_op1(op1), 
 						   .i_op2(op2), 

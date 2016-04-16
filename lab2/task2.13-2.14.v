@@ -1,11 +1,11 @@
 `timescale 1 ns /1 ps
 
-`include "task2.1.v"
-`include "task2.3.v"
-`include "task2.5.v"
-`include "task2.7.v"
-`include "task2.9.v"
-`include "task2.11.v"
+//`include "task2.1.v"
+//`include "task2.3.v"
+//`include "task2.5.v"
+//`include "task2.7.v"
+//`include "task2.9.v"
+//`include "task2.11.v"
 
 module subtractor_without_borrow_in (i_op1, i_op2, o_subtract, o_borrow_out);
 
@@ -22,14 +22,14 @@ module subtractor_without_borrow_in (i_op1, i_op2, o_subtract, o_borrow_out);
 	generate 
 		for(i=0; i<4; i=i+1) begin : adder_iteration
 			if(i==0) 
-				half_subtractor cell (.i_op1(i_op1[i]),
+				half_subtractor cl (.i_op1(i_op1[i]),
 									 .i_op2(i_op2[i]),
 									 .o_subtract(o_subtract[i]),
 									 .o_borrow(borrow[i])
 									);
 			
 			else 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 									 .i_op2(i_op2[i]),
 									 .i_borrow_in(borrow[i-1]),
 									 .o_subtract(o_subtract[i]),
@@ -107,6 +107,7 @@ module behavioral_alu(i_op1, i_op2, i_ctrl, o_data);
 			2: o_data <= i_op1*i_op2;
 			3: o_data <= ~(i_op1&i_op2);
 			4: o_data <= ~(i_op1|i_op2);
+			default: o_data <= 0;
 		endcase // i_ctrl
 	end
 endmodule

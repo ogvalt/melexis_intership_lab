@@ -1,9 +1,9 @@
 `timescale 1 ns/1 ps
 
-module lb2_tb;
+module multiplier_tb;
 
-	reg [ 3:0]  op1, op2;
-	reg [ 7:0]  mult;
+	reg  [ 3:0]  op1, op2;
+	wire [ 7:0]  mult;
 
 	multiple multi(.i_op1(op1), 
 			  .i_op2(op2), 

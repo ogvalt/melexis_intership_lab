@@ -1,14 +1,14 @@
 `timescale 1 ns/1 ps
 
-module task210;
+module bitwise_nand_tb;
 
-	reg [ 3:0]  op1, op2;
-	reg [ 3:0]  out;
+	reg  [ 3:0]  op1, op2;
+	wire [ 3:0]  out;
 
 	bitwise_nand noand(.i_op1(op1),
-				 	  .i_op2(op2),
-				 	  .o_nand(out)
-				 	 );		   		
+				 	   .i_op2(op2),
+				 	   .o_nand(out)
+				 	  );		   		
 
 	integer i, j, res, error = 0;
 

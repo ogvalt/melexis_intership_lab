@@ -1,9 +1,9 @@
 `timescale 1 ns /1 ps
 
-`include "task2.18_multiplier_with_tb.v"
-`include "task2.18_nand_with_tb.v"
-`include "task2.18_nor_with_tb.v"
-`include "task2.7.v"
+//`include "task2.18_multiplier_with_tb.v"
+//`include "task2.18_nand_with_tb.v"
+//`include "task2.18_nor_with_tb.v"
+//`include "task2.7.v"
 
 module adder_without_carry_in(i_op1, i_op2, o_sum, o_carry_out);
 
@@ -22,14 +22,14 @@ module adder_without_carry_in(i_op1, i_op2, o_sum, o_carry_out);
 	generate 
 		for(i=0; i<WIDTH; i=i+1) begin : adder_iteration
 			if(i==0) 
-				half_adder cell (.i_op1(i_op1[i]),
+				half_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .o_sum(o_sum[i]),
 								 .o_carry(carry[i])
 								);
 			
 			else 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(carry[i-1]),
 								 .o_sum(o_sum[i]),
@@ -57,14 +57,14 @@ module subtractor_without_borrow_in (i_op1, i_op2, o_subtract, o_borrow_out);
 	generate 
 		for(i=0; i<WIDTH; i=i+1) begin : subtractor_iteration
 			if(i==0) 
-				half_subtractor cell (.i_op1(i_op1[i]),
+				half_subtractor cl (.i_op1(i_op1[i]),
 									 .i_op2(i_op2[i]),
 									 .o_subtract(o_subtract[i]),
 									 .o_borrow(borrow[i])
 									);
 			
 			else 
-				full_subtractor cell (.i_op1(i_op1[i]),
+				full_subtractor cl (.i_op1(i_op1[i]),
 									 .i_op2(i_op2[i]),
 									 .i_borrow_in(borrow[i-1]),
 									 .o_subtract(o_subtract[i]),
@@ -119,11 +119,11 @@ module alu(i_op1, i_op2, i_ctrl, o_data);
 									   .o_nor(nor_result)
 									   );
 
-	mux #(.WIDTH(2*WIDTH)) multiplexer (.i_data1({{WIDTH{zero_wire}},add_result}), 
-										  .i_data2({{WIDTH{zero_wire}},sub_result}), 
-										  .i_data3(mult_result), 
-										  .i_data4({{WIDTH{zero_wire}},nand_result}), 
-										  .i_data5({{WIDTH{zero_wire}},nor_result}), 
+	mux #(.WIDTH(2*WIDTH)) multiplexer (.i_data0({{WIDTH{zero_wire}},add_result}), 
+										  .i_data1({{WIDTH{zero_wire}},sub_result}), 
+										  .i_data2(mult_result), 
+										  .i_data3({{WIDTH{zero_wire}},nand_result}), 
+										  .i_data4({{WIDTH{zero_wire}},nor_result}), 
 										  .i_ctrl(i_ctrl), 
 										  .o_data(o_data)
 										  );
@@ -146,23 +146,24 @@ module behavioral_alu(i_op1, i_op2, i_ctrl, o_data);
 			2: o_data <= i_op1*i_op2;
 			3: o_data <= ~(i_op1&i_op2);
 			4: o_data <= ~(i_op1|i_op2);
+			default: o_data <= 0;
 		endcase // i_ctrl
 	end
 endmodule
 
 module alu_tb;
-
-	reg [ 3:0]  op1, op2;
+	parameter WIDTH = 8;
+	reg [WIDTH-1:0]  op1, op2;
 	reg [ 2:0]  ctrl;
-	wire[ 7:0]  out_beh;
-	reg [ 7:0]  out_rtl;
+	wire[2*WIDTH-1:0]  out_beh;
+	wire[2*WIDTH-1:0]  out_rtl;
 
-	behavioral_alu #(.WIDTH(4)) alu_beh(.i_op1(op1), 
+	behavioral_alu #(.WIDTH(WIDTH)) alu_beh(.i_op1(op1), 
 									   .i_op2(op2), 
 									   .i_ctrl(ctrl), 
 									   .o_data(out_beh)
 									   );
-	alu #(.WIDTH(4)) alu_rtl(.i_op1(op1), 
+	alu #(.WIDTH(WIDTH)) alu_rtl(.i_op1(op1), 
 							   .i_op2(op2), 
 							   .i_ctrl(ctrl), 
 							   .o_data(out_rtl)
@@ -171,7 +172,7 @@ module alu_tb;
 	integer i, j, res, error = 0;
 
 	initial begin
-		for (i=0; i<500; i=i+1) begin: test
+		for (i=0; i<2**WIDTH; i=i+1) begin: test
 			op1 = $random();
 			op2 = $random();
 			ctrl = {$random} % 5;

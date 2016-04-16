@@ -31,129 +31,109 @@ module full_adder(i_op1, i_op2, i_carry_prev, o_sum, o_carry);
 								 );
 
 endmodule
-
-module adder_without_carry_in(i_op1, i_op2, o_sum, o_carry_out);
-
+module stage(i_prev_stage, i_op, i_bit, i_carry, o_carry, o_result);
 	parameter WIDTH = 4;
+	input  [WIDTH-2:0] i_prev_stage;
+	input  [WIDTH-1:0] i_op;
+	input  			   i_bit, i_carry;
+	output [WIDTH-1:0] o_result;
+	output 			   o_carry;
 
-	input  [WIDTH-1:0] i_op1, i_op2;
-	output [WIDTH-1:0] o_sum;
-	output 		       o_carry_out;
-
-	wire   [WIDTH-1:0] carry;
-
-	assign o_carry_out = carry[WIDTH-1];
-
+	wire   [WIDTH-1:0] carry_bit;
+	wire   [WIDTH-1:0] o_and;
+	
 	genvar i;
 
-	generate 
-		for(i=0; i<WIDTH; i=i+1) begin : adder_iteration
-			if(i==0) 
-				half_adder cell (.i_op1(i_op1[i]),
-								 .i_op2(i_op2[i]),
-								 .o_sum(o_sum[i]),
-								 .o_carry(carry[i])
-								);
-			
-			else 
-				full_adder cell (.i_op1(i_op1[i]),
-								 .i_op2(i_op2[i]),
-								 .i_carry_prev(carry[i-1]),
-								 .o_sum(o_sum[i]),
-								 .o_carry(carry[i])
-								);
-			
-		end
+	generate
+		for(i=0; i<WIDTH; i=i+1) begin: component_iterarion 
+			if(i==0) begin
+				and(o_and[i], i_op[i], i_bit);
+				half_adder ha(.i_op1(o_and[i]), 
+							  .i_op2(i_prev_stage[i]), 
+							  .o_sum(o_result[i]), 
+							  .o_carry(carry_bit[i]));
+			end //(i==0)
+			else begin
+				if(i==WIDTH-1) begin
+					and(o_and[i], i_op[i], i_bit);
+					full_adder fa(.i_op1(o_and[i]), 
+								  .i_op2(i_carry),
+						  		  .i_carry_prev(carry_bit[i-1]), 
+						          .o_sum(o_result[i]), 
+						  		  .o_carry(o_carry));
+				end	//(i==WIDTH-1)
+				else begin
+					and(o_and[i], i_op[i], i_bit);
+					full_adder fa(.i_op1(o_and[i]), 
+								  .i_op2(i_prev_stage[i]),
+						  		  .i_carry_prev(carry_bit[i-1]), 
+						          .o_sum(o_result[i]), 
+						  		  .o_carry(carry_bit[i]));
+				end //(i!=WIDTH-1)
+			end //(i!=0)
+		end //component_iteration
 	endgenerate
 endmodule
+
 module param_multiplier(i_op1, i_op2, o_mult);
 
 	parameter WIDTH = 4;
 
-	input	[WIDTH-1:0] i_op1, i_op2;
-	output 	[2*WIDTH-1:0] o_mult;
+	input  [   WIDTH-1:0] i_op1, i_op2;
+	output [ 2*WIDTH-1:0] o_mult;
+	wire   [WIDTH**2-1:0] interconnect;
+	wire   [   WIDTH-2:0] carry;
 
-	wire [4*WIDTH-1:0] connect;
-	wire [WIDTH-2:0] sum_first_stage;
-	wire [WIDTH-1:0] sum_stage [0:WIDTH-2];
-	wire [WIDTH-1:0] carry_stage;
-	wire b12, c12;
+	genvar i, j;
 
-	assign o_mult[0] = connect[0];	
-
-
-	genvar i,j;
-	
-	generate begin:multiplier
-		for (i=0; i<WIDTH; i=i+1) begin:outer
-			for (j=0; j<WIDTH; j=j+1) begin:inner
-				and a1(connect[WIDTH*i+j], i_op1[i], i_op2[j]);
-				end //inner
-			end //outer
-		for (i=0; i<WIDTH-1; i=i+1) begin:iter
-			if(i==0) begin
-				adder_without_carry_in #(.WIDTH(WIDTH-1)) first_stage ( .i_op1(connect[WIDTH-1:1]),
-																		.i_op2(connect[WIDTH+:(WIDTH-1)]),
-																		.o_sum(sum_first_stage),
-																		.o_carry_out(carry_stage[i])
-																		);
-				assign o_mult[i+1] = sum_first_stage[0];
-				half_adder between12 (.i_op1(connect[2*WIDTH-1]),
-									  .i_op2(carry_stage[i]),
-									  .o_sum(b12),
-									  .o_carry(c12)
-									  ); 
-			end
-			else begin
-				if(i==1) begin
-					adder_without_carry_in #(.WIDTH(WIDTH)) second_stage (.i_op1({c12,b12,sum_first_stage[WIDTH-2:1]}),
-																		  .i_op2(connect[(i+1)*WIDTH+:WIDTH]),
-																		  .o_sum(sum_stage[i-1]),
-																		  .o_carry_out(carry_stage[i])
-																		  );
-					assign o_mult[i+1] = sum_stage[i-1][0];
-				end
-				else begin
-					if(i==(WIDTH-2)) begin
-						adder_without_carry_in #(.WIDTH(WIDTH)) last_stage (.i_op1({carry_stage[i-1], sum_stage[i-2][3:1]}),
-																			.i_op2(connect[(i+1)*WIDTH+:WIDTH]),
-																			.o_sum(sum_stage[i-1]),
-																			.o_carry_out(carry_stage[i])
-																			);
-						assign o_mult[2*WIDTH-1:WIDTH-1] = {carry_stage[i], sum_stage[i-1]}; 
-					end
-					else begin
-						adder_without_carry_in #(.WIDTH(WIDTH)) stage (.i_op1({carry_stage[i-1], sum_stage[i-2][3:1]}),
-																	   .i_op2(connect[(i+1)*WIDTH+:WIDTH]),
-																	   .o_sum(sum_stage[i-1]),
-																	   .o_carry_out(carry_stage[i])
-																	  );
-						assign o_mult[i+1] = sum_stage[i-1][0];
-					end
-				end
-			end
-		end //iter
-		end //multplier
+	generate
+		for(i=0; i<WIDTH; i=i+1) begin: op2_iteration
+			if (i==0) begin: stage0
+				for (j=0; j<WIDTH; j=j+1) begin: stage0_iteration
+					and (interconnect[j], i_op1[j], i_op2[i]);
+				end //stage0_iteration
+			end //stage0
+			else begin: other_stages
+				if (i==1) begin: stage1
+					stage #(.WIDTH(WIDTH)) stage(.i_prev_stage(interconnect[(i-1)*WIDTH+1 +: WIDTH-1]), 
+										.i_op(i_op1),
+										.i_bit(i_op2[i]), 
+										.i_carry(1'b0), 
+										.o_carry(carry[i-1]), 
+										.o_result(interconnect[i*WIDTH +: WIDTH]));
+				end //stage1
+				else begin: next_stages
+					stage #(.WIDTH(WIDTH)) stage(.i_prev_stage(interconnect[(i-1)*WIDTH+1 +: WIDTH-1]), 
+										.i_op(i_op1),
+										.i_bit(i_op2[i]), 
+										.i_carry(carry[i-2]), 
+										.o_carry(carry[i-1]), 
+										.o_result(interconnect[i*WIDTH +: WIDTH]));
+				end //next_stages
+			end //other_stages
+			if (i==WIDTH-1)
+				assign o_mult[i +: WIDTH + 1] = {carry[i-1],interconnect[i*WIDTH +: WIDTH]};
+			else 
+				assign o_mult[i] = interconnect[i*WIDTH];
+		end //op2_iteration
 	endgenerate
 endmodule
 
-`timescale 1 ns/1 ps
-
 module param_multiplier_tb;
+	parameter WIDTH = 7;
+	reg  [WIDTH-1:0]  op1, op2;
+	wire [2*WIDTH-1:0]  mult;
 
-	reg [ 3:0]  op1, op2;
-	reg [ 7:0]  mult;
-
-	param_multiplier #(.WIDTH(4)) multi(.i_op1(op1), 
-						   .i_op2(op2), 
-						   .o_mult(mult)
-						  );		   		
+	param_multiplier #(.WIDTH(WIDTH)) multi(.i_op1(op1), 
+						                    .i_op2(op2), 
+						   					.o_mult(mult)
+						  					);		   		
 
 	integer i, j, res, error = 0;
 
 	initial begin
-		for (i=0; i<16; i=i+1) begin
-			for (j=0; j<16; j=j+1) begin
+		for (i=0; i<2**WIDTH; i=i+1) begin
+			for (j=0; j<2**WIDTH; j=j+1) begin
 				res = i * j;
 				op1 = i;
 				op2 = j;

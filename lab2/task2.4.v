@@ -1,11 +1,12 @@
+//`include "task2.3.v"
 `timescale 1 ns/1 ps
 
-module task24;
+module four_bit_subtractor_tb;
 
-	reg [ 3:0]  op1, op2;
+	reg  [ 3:0] op1, op2;
 	reg 	    borrow_in;
-	reg [ 3:0]  subtract;
-	reg 		borrow_out;
+	wire [ 3:0] subtract;
+	wire 		borrow_out;
 
 	reg signed [ 4:0]  borrow_concat_sub;
 
@@ -27,11 +28,26 @@ module task24;
 				op2 = j;
 				#1;
 				borrow_concat_sub = $signed({borrow_out, subtract});
-				if (res!=borrow_concat_sub) begin
+				if (res!==borrow_concat_sub) begin
 					error = error + 1;
 					$display("Error at %d: i=%d, j=%d, i-j=%d, op1=%d, op2=%d, op1-op2=%d, borrow_out=%d, subtract=%d",$time, 
 						i, j, res, op1, op2, borrow_concat_sub, borrow_out, subtract);
-				end // if (res!= sum)
+				end 
+			end // for (j=0; j<16; j=j+1)
+		end // for (i=0; i<16; i=i+1)
+		borrow_in = 1;
+		for (i=0; i<16; i=i+1) begin
+			for (j=0; j<16; j=j+1) begin
+				res = i - j - borrow_in;
+				op1 = i;
+				op2 = j;
+				#1;
+				borrow_concat_sub = $signed({borrow_out, subtract});
+				if (res!==borrow_concat_sub) begin
+					error = error + 1;
+					$display("Error at %d: i=%d, j=%d, i-j=%d, op1=%d, op2=%d, op1-op2=%d, borrow_out=%d, subtract=%d",$time, 
+						i, j, res, op1, op2, borrow_concat_sub, borrow_out, subtract);
+				end 
 			end // for (j=0; j<16; j=j+1)
 		end // for (i=0; i<16; i=i+1)
 		if (error==0) $display("!!!Test completed succesfully");

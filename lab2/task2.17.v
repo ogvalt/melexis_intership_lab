@@ -1,6 +1,6 @@
 `timescale 1 ns /1 ps
-`include "task2.1.v"
-`include "task2.3.v"
+//`include "task2.1.v"
+//`include "task2.3.v"
 
 module adder_or_subtractor(i_op1, i_op2, i_carry_borrow_in, o_res, o_carry_borrow_out);
 

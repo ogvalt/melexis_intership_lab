@@ -50,7 +50,7 @@ module param_adder (i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
 	generate 
 		for(i=0; i<WIDTH; i=i+1) begin : adder_iteration
 			if(i==0) 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(i_carry_in),
 								 .o_sum(o_sum[i]),
@@ -58,7 +58,7 @@ module param_adder (i_op1, i_op2, i_carry_in, o_sum, o_carry_out);
 								);
 			
 			else 
-				full_adder cell (.i_op1(i_op1[i]),
+				full_adder cl (.i_op1(i_op1[i]),
 								 .i_op2(i_op2[i]),
 								 .i_carry_prev(carry[i-1]),
 								 .o_sum(o_sum[i]),
@@ -72,15 +72,15 @@ endmodule
 `timescale 1 ns/1 ps
 
 module adder_tb;
-
-	reg [ 3:0]  op1, op2;
+	parameter WIDTH = 8;
+	reg  [WIDTH-1:0] op1, op2;
 	reg 	    carry_in;
-	reg [ 3:0]  sum;
-	reg 		carry_out;
+	wire [WIDTH-1:0] sum;
+	wire 		carry_out;
 
-	reg [ 4:0]  carry_concat_sum;
+	reg [WIDTH:0]  carry_concat_sum;
 
-	param_adder #(.WIDTH(4)) add(.i_op1(op1), 
+	param_adder #(.WIDTH(WIDTH)) add(.i_op1(op1), 
 								 .i_op2(op2), 
 								 .i_carry_in(carry_in), 
 								 .o_sum(sum), 
@@ -90,14 +90,29 @@ module adder_tb;
 
 	initial begin
 		carry_in = 0;
-		for (i=0; i<16; i=i+1) begin
-			for (j=0; j<16; j=j+1) begin
+		for (i=0; i<2**WIDTH; i=i+1) begin
+			for (j=0; j<2**WIDTH; j=j+1) begin
 				res = i + j;
 				op1 = i;
 				op2 = j;
 				#1;
 				carry_concat_sum = {carry_out, sum};
-				if (res!=carry_concat_sum) begin
+				if (res!==carry_concat_sum) begin
+					error = error + 1;
+					$display("Error at %d: i=%d, j=%d, i+j=%d, op1=%d, op2=%d, op1+op2=%d, carry_out=%d, sum=%d",$time, 
+						i,j,res,op1,op2,carry_concat_sum, carry_out, sum);
+				end // if (res!= sum)
+			end // for (j=0; j<16; j=j+1)
+		end // for (i=0; i<16; i=i+1)
+		carry_in = 1;
+		for (i=0; i<2**WIDTH; i=i+1) begin
+			for (j=0; j<2**WIDTH; j=j+1) begin
+				res = i + j + carry_in;
+				op1 = i;
+				op2 = j;
+				#1;
+				carry_concat_sum = {carry_out, sum};
+				if (res!==carry_concat_sum) begin
 					error = error + 1;
 					$display("Error at %d: i=%d, j=%d, i+j=%d, op1=%d, op2=%d, op1+op2=%d, carry_out=%d, sum=%d",$time, 
 						i,j,res,op1,op2,carry_concat_sum, carry_out, sum);
