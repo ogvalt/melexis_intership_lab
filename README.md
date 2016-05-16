@@ -7,3 +7,5 @@ Second lab: consist of rtl descriptions of adder, subtractor, multiplier, bitwis
             and their parameterized version (plus testbench)
             
 Third lab: consist of two fsm that describe traffic light and vending machine (testbenches are provided, plus answers of question)
+
+Fourth lab: FIR filter
