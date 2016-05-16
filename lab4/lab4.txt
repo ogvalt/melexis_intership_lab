@@ -1,0 +1,41 @@
+Question 1 
+	
+	In singed fixed-point 5.3 format first 5 bits of a number store integer value (including sign) and
+	another 3 bits store fraction of a whole number. So,
+	001100101 -> 001100.101 -> 001100 - integer, 101 - fraction. 001100 = +(2^2 + 2^3) = 4+8 = 12
+	101 = (2^0 + 2^2)*(1/2^3) = (1+4)*0.125 = 0.625. 001100101 = 12.625
+	Make the same calcuation for 010001010:
+	010001010 -> 010001.010, 010001 = 2^0+2^4 = +(1 + 16) = 17, 010 = 2^1 * (1/2^3) = 2*0.125 = 0.250
+	010001010 = 17.250
+
+Question 2 
+
+	Fixed-point number in format 1.5.
+	h0 = -3*(2^-5) = -3*0.03125 = -0.09375
+	h1 = -8*(2^-5) = -8*0.03125 = -0.250
+	h2 = -8*0.03125 = -0.250
+	h3 = 0*0.03125 = 0*0
+	h4 = 11*0.03125 = 0.34375
+	h5 = 16*0.03125 = 0.5
+	h6 = 11*0.03125 = 0.34375
+	h7 = 0*0.03125 = 0*0
+	h8 = -8*0.03125 = -0.250
+	h9 = -8*0.03125 = -0.250
+	h10 = -3*0.03125 = -0.09375
+	
+Question 3
+
+	Firstly, input data has 18-bit lenght. Maximum value that can be find after shifting input sample
+	will have 22-bit lenght. In the worst case when on the greatest coefficient of impulse responce came
+	maximum value of input signal and on the least one came mininum value of input signal caused overflow.
+	This is due to sum of impulse responce coefficient that (sum) can be greater that 1.
+	To prevent overflow accumulator must have 25-bit lenght. p = log2(SUM(|hi|)), where p is a number of additional
+	bits in accumulator lenght. In case of Fig.4.42 p = 7, 18+7=25 bits.
+	
+	Why we shift this 25 bit result by 6 bits right? 
+	Shifting output of accumulator by 6 bits right isn't correct strategy because shifting cause 
+	drop-down of bits that can be round to the nearest value. So the right strategy is to round. 
+	How we obtain 18-bit data on filter’s output?
+	First two MSB are help us to detect saturation, next 18 bits is our output value, last 5 bits
+	will round to the nearest greater number
+	
